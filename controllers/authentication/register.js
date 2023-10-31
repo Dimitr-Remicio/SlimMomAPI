@@ -1,30 +1,60 @@
-const bcrypt = require('bcryptjs');
-const { User, schemas } = require(`../../schemas/user`);
+const bcrypt = require("bcryptjs");
+const { User } = require(`../../schemas/user`);
 const { createError } = require(`../../helpers`);
-const tokenService =require('../../config/tokenService')
+const tokenService = require("../../config/tokenService");
 
 const register = async (req, res) => {
-    const { error } = schemas.register.validate(req.body);
-    if (error) {
-        throw createError(400, error.message);
-    }
 
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (user) {
-        throw createError(409, 'Email in use')
-    }
+  const {
+    name,
+    email,
+    password,
+    height = null,
+    age = null,
+    currentWeight = null,
+    desiredWeight = null,
+    bloodType = 1,
+  } = req.body;
 
-    const hashPassword = await bcrypt.hash(password, 10);
-    const verificationToken = tokenService.generateVerificationToken();
-    const result = await User.create({...req.body, password: hashPassword, verificationToken});
-    res.status(201).json({
-        user: {
-            email: result.email,
-            token:verificationToken,
-            // subscription: result.subscription,
-        },
-    });
-}
+  const user = await User.findOne({ email });
+
+  if (user) {
+    createError("Email in use");
+  }
+
+
+  const createdAt = new Date().toLocaleDateString();
+  const hashPassword = await bcrypt.hash(password, 10);
+  const verificationToken = tokenService.generateVerificationToken();
+
+  const newUser = new User({
+    name,
+    email,
+    password:hashPassword,
+    createdAt,
+    height,
+    age,
+    currentWeight,
+    desiredWeight,
+    bloodType,
+  });
+  await newUser.save();
+
+  const token = verificationToken;
+
+  res.status(201).json({
+    token,
+    user: {
+      name,
+      email,
+        createdAt,
+      height,
+      age,
+      currentWeight,
+      desiredWeight,
+      bloodType,
+    },
+  });
+};
 
 module.exports = register;

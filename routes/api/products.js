@@ -16,6 +16,6 @@ const router = express.Router();
 //     res.status(500).json({ error: "Error en el servidor" });
 //   }
 // });
-router.get('/',  ctrlWrapper(ctrl.getAllProducts));
+router.get('/getAll',  ctrlWrapper(ctrl.getAllProducts));
 
 module.exports = router;
