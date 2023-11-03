@@ -1,46 +1,23 @@
-const { Schema, model } = require('mongoose');
-const Joi = require('joi');
+const { Schema, model } = require("mongoose");
 
-const productSchema = Schema({
+const productSchema = new Schema(
+  {
     categories: {
-        type: String,
-        required: [true, 'categories is required'],
+      type: String,
     },
     weight: {
-        type: Number,
-        required: [true, 'Weight is required'],
+      type: Number,
     },
     title: {
-        type: String,
-        required: [true, 'Name is required'],
+      type: String,
     },
     calories: {
-        type: Number,
-        required: [true, 'Calories is required'],
+      type: Number,
     },
-    groupBloodNotAllowed: {
-        1: { type: Boolean, required: true },
-        2: { type: Boolean, required: true },
-        3: { type: Boolean, required: true },
-        4: { type: Boolean, required: true },
-     },
-}, { versionKey: false, timestamps: true });
+    groupBloodNotAllowed: [Boolean],
+  },
+  { versionKey: false, timestamps: true }
+);
+const ProductSchema = model("Product", productSchema);
 
-const registerSchema = Joi.object({
-    categories: Joi.string().required(),
-    weight: Joi.string().required(),
-    title: Joi.string().required(),
-    calories: Joi.string().required(),
-    groupBloodNotAllowed: Joi.string()
-});
-
-const schemas = {
-    register: registerSchema
-};
-
-const Product = model('product', productSchema);
-
-module.exports = {
-    Product,
-    schemas
-};
+module.exports = ProductSchema;
