@@ -1,5 +1,6 @@
 const User = require("../schemas/users");
 const Summary = require("../schemas/summary");
+const Day = require("../schemas/days");
 
 const { getUnhealthyList } = require("./products");
 
@@ -19,7 +20,7 @@ const calculatorPublic = async (body) => {
       5 * age -
       161 -
       10 * (weightCurrent - weightDesired);
-   
+
     return {
       dailyRate,
       notHealthy: notAllowedProducts,
@@ -27,7 +28,7 @@ const calculatorPublic = async (body) => {
   } catch (error) {
     console.error("database error:", error);
   }
- }
+};
 
 const calculator = async (body, userId) => {
   try {
@@ -81,6 +82,8 @@ const calculator = async (body, userId) => {
       }
     );
     summaryUpdate.save();
+    const userDay = new Day({ date: new Date(), userId, sumId:summaryUpdate._id});
+    userDay.save();
     return {
       user: userUpdate,
       notHealthy: dataUnHealthyList,
