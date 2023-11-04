@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const app = require("./api");
+const app = require("./app");
 
 require("dotenv").config();
 mongoose.Promise = global.Promise;
@@ -21,5 +21,5 @@ connection
   })
   .catch((err) => {
     console.log(`Server not running. Error message: ${err.message}`);
-    return process.exit();
+    return process.exit()
   });
