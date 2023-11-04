@@ -148,5 +148,18 @@ router.patch("/calculator", auth, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+router.get("/", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.json(user);
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid userID" });
+    }
+    res
+      .status(500)
+      .json({ error: `Server error type: ${error.name}` });
+  }
+});
 
 module.exports = router;
