@@ -42,7 +42,9 @@ const router = express.Router();
 //   }
 // };
 
-router.get("/", async (req, res) => {
+
+// route to search and add products
+router.get("/products", async (req, res) => {
   try {
     const query = new RegExp(req.query.search, "i");
     const products = await listProducts({
@@ -54,7 +56,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-router.get("/unhealthy", auth, async (req, res) => {
+router.get("products/unhealthy", auth, async (req, res) => {
   try {
     const notHealtyList = await getUnhealthyList(req.user.blood, req.query);
     res.json(notHealtyList);
@@ -132,7 +134,7 @@ router.get("/unhealthy", auth, async (req, res) => {
 //     }
 //   }
 // );
-router.post("/", async (req, res) => {
+router.post("/calculator", async (req, res) => {
   try {
     const result = await calculatorPublic(req.body);
     res.status(201).json(result);

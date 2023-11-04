@@ -2,17 +2,26 @@ const { Schema, model } = require("mongoose");
 
 const daySchema = new Schema(
   {
-    product_id: {
+    date: {
+      type: Date,
+    },
+    productsId: [{
       type: Schema.Types.ObjectId,
       ref: "Product",
-    },
-    sum_id: { type: Schema.Types.ObjectId, ref: "Summary" },
-    user_id: {
+    }],
+    sumId: { type: Schema.Types.ObjectId, ref: "Summary" },
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "Users",
     },
-    weight: Number,
-    calories: Number,
+    weight: {
+      type: Number,
+      default: 0,
+    },
+    calories: {
+      type: Number,
+      default: 0,
+    },
   },
   { versionKey: false, timestamps: true }
 );
