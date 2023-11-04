@@ -18,17 +18,17 @@ const schemaSignUp = Joi.object({
     .max(20)
     .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$/)
     .required(),
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
+  // confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
 });
 
 const validateEmailPassword = async (req, res, next) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    const { name, email, password } = req.body;
     await schemaSignUp.validateAsync({
       name,
       email,
       password,
-      confirmPassword,
+      // confirmPassword,
     });
     next();
   } catch (error) {
@@ -53,6 +53,7 @@ router.post("/signup", validateEmailPassword, async (req, res) => {
     await newUser.save();
     const newSummary = new Summary({ date: new Date(), userId: newUser._id });
     await newSummary.save();
+    
     res.status(201).json({
       user: {
         name,
@@ -120,6 +121,20 @@ router.post("/login", async (req, res) => {
 //     res.status(500).json({ message: error });
 //   }
 // });
+
+router.get("/logout", auth, async (req, res) => {
+  const { _id: userId } = req.user;
+ const user = await User.findById(userId);
+
+ if (!user) {
+   return res.status(401).json({ message: "Invalid" });
+ }
+
+ await User.findByIdAndUpdate(user._id, { token: null });
+
+ res.status(204).json();
+
+});
 
 router.get("/current", auth, async (req, res, next) => {
   const {
