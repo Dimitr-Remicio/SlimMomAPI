@@ -5,10 +5,16 @@ const daySchema = new Schema(
     date: {
       type: Date,
     },
-    productsId: [{
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-    }],
+    productsId: [
+      {
+        foodId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        amount: { type: Number, default: 0 },
+        caloriesPerAmount: { type: Number, default: 0 },
+      },
+    ],
     sumId: { type: Schema.Types.ObjectId, ref: "Summary" },
     userId: {
       type: Schema.Types.ObjectId,

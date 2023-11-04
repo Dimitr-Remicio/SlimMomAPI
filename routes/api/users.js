@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
   const { name, blood, height, age, weightCurrent, weightDesired, dailyRate } =
     user;
   const token = jwt.sign({ id: user._id }, process.env.SECRET, {
-    expiresIn: "1m",
+    expiresIn: "1h",
   });
   await User.findByIdAndUpdate(user._id, { token });
 
@@ -125,7 +125,7 @@ router.get("/current", auth, async (req, res, next) => {
   const { _id, email, name } = req.user;
   console.log();
   const newToken = jwt.sign({ id: _id }, process.env.SECRET, {
-    expiresIn: "1m",
+    expiresIn: "1h",
   });
   const oldToken = req.headers.authorization.split(" ");
   await User.findByIdAndUpdate(_id, { token: newToken });

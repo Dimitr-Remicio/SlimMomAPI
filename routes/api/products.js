@@ -6,9 +6,7 @@ const {
   listProducts,
   getUnhealthyList,
 } = require("../../controllers/products.js");
-const {
-  calculatorPublic,
-} = require("../../controllers/calculator.js");
+const { calculatorPublic } = require("../../controllers/calculator.js");
 
 const router = express.Router();
 
@@ -42,14 +40,11 @@ const router = express.Router();
 //   }
 // };
 
-
 // route to search and add products
-router.get("/products", async (req, res) => {
+router.get("/products", auth, async (req, res) => {
   try {
-    const query = new RegExp(req.query.search, "i");
-    const products = await listProducts({
-      title: query,
-    });
+    const query = req.query.search;
+    const products = await listProducts(req.user.blood, query);
     res.json(products);
   } catch (error) {
     console.error("Error in route /:", error);

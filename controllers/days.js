@@ -1,8 +1,9 @@
+const mongoose = require("mongoose");
 const Days = require("../schemas/days");
 const Product = require("../schemas/products");
 const Summary = require("../schemas/summary");
 const moment = require("moment-timezone");
-const { findById } = require("../schemas/users");
+// const { findById } = require("../schemas/users");
 
 const addProduct = async (body, userId) => {
   try {
@@ -28,7 +29,7 @@ const addProduct = async (body, userId) => {
     await daySummary.save();
 
     const dataDayUpdate = {
-      $push: { productsId: _id },
+      $push: { productsId: { foodId: _id, amount, caloriesPerAmount } },
       userId,
       weight,
       calories: caloriesPerAmount,
@@ -85,8 +86,38 @@ const getDayInfo = async (body, userId) => {
     daySummary: dataSummary,
   };
 };
+const removeProduct = async ({ dayId, productId, sumId }) => {
+  const tempDay = await Days.findById(dayId);
+  const tempDayProducts = tempDay.productsId;
+  const ObjectId = mongoose.Types.ObjectId;
+  const productToRemove = tempDayProducts.find((product) =>
+    product.foodId.equals(new ObjectId(productId))
+  );
+  console.log(tempDay.productsId);
+  const updateSummary = await Summary.findByIdAndUpdate(
+    sumId,
+    {
+      $inc: {
+        left: productToRemove.caloriesPerAmount,
+        consumed: -productToRemove.caloriesPerAmount,
+      },
+    },
+    { new: true }
+  );
+
+  const updateDay = await Days.findByIdAndUpdate(
+    dayId,
+    { $pull: { productsId: { foodId: productId } } },
+    { new: true }
+  );
+  const response = updateDay
+    ? { updateDay, message: "Food deleted", summary: updateSummary }
+    : { message: "The food has not been added yet." };
+  return response;
+};
 
 module.exports = {
   addProduct,
   getDayInfo,
+  removeProduct,
 };
