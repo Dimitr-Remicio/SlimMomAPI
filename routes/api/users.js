@@ -76,7 +76,7 @@ router.post("/login", async (req, res) => {
   const { name, blood, height, age, weightCurrent, weightDesired, dailyRate } =
     user;
   const token = jwt.sign({ id: user._id }, process.env.SECRET, {
-    expiresIn: "1m",
+    expiresIn: "1h",
   });
   await User.findByIdAndUpdate(user._id, { token });
 
@@ -140,7 +140,7 @@ router.get("/current", auth, async (req, res, next) => {
   const { _id, email, name } = req.user;
   console.log();
   const newToken = jwt.sign({ id: _id }, process.env.SECRET, {
-    expiresIn: "1m",
+    expiresIn: "1h",
   });
   const oldToken = req.headers.authorization.split(" ");
   await User.findByIdAndUpdate(_id, { token: newToken });
@@ -161,6 +161,19 @@ router.patch("/calculator", auth, async (req, res) => {
       return res.status(400).json({ message: "Invalid contact ID" });
     }
     res.status(500).json({ error: "Server error" });
+  }
+});
+router.get("/", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.json(user);
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid userID" });
+    }
+    res
+      .status(500)
+      .json({ error: `Server error type: ${error.name}` });
   }
 });
 
