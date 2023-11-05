@@ -72,8 +72,8 @@ const getDayInfo = async (body, userId) => {
   const dataDay = await Days.findOne({ date: dayRange, userId });
   const dataSummary = await Summary.findOne({ date: dayRange, userId });
   console.log(dataDay.productsId);
-  const getProductsAllowed = dataDay.productsId.map((idProduct) =>
-    Product.findById(idProduct)
+  const getProductsAllowed = dataDay.productsId.map((product) =>
+    Product.findById(product.foodId)
   );
   const getAllowed = await Promise.all(getProductsAllowed);
 
