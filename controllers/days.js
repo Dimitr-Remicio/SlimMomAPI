@@ -14,7 +14,7 @@ const addProduct = async (body, userId) => {
       $lte: moment.tz(new Date(`${date}T23:59:59.999`), "America/Bogota").utc(),
     };
     const dataProduct = await Product.findById(productId);
-    const { _id, weight, calories, title, groupBloodNotAllowed } = dataProduct;
+    const { _id: foodId, weight, calories, title, groupBloodNotAllowed } = dataProduct;
 
     const daySummary = await Summary.findOne({ date: dayCurrent, userId });
     const { _id: sumId, left, consumed, dailyRate } = daySummary;
@@ -30,7 +30,7 @@ const addProduct = async (body, userId) => {
     await daySummary.save();
 
     const dataDayUpdate = {
-      $push: { productsId: { foodId: _id, amount, caloriesPerAmount } },
+      $push: { productsId: { foodId, amount, caloriesPerAmount } },
       userId,
       weight,
       calories: caloriesPerAmount,
@@ -47,9 +47,10 @@ const addProduct = async (body, userId) => {
       }
     );
     console.log(dataDay);
+    const index = dataDay.productsId.length - 1;
     return {
       addedProduct: {
-        product: { _id, weight, calories, title, groupBloodNotAllowed },
+        product: { foodId, weight, calories, title, groupBloodNotAllowed, addId: dataDay.productsId[index]._id },
         dayId: dataDay._id,
         userId,
         weight: amount,
@@ -93,13 +94,13 @@ const getDayInfo = async (body, userId) => {
     },
   };
 };
-const removeProduct = async ({ dayId, productId, sumId }) => {
+const removeProduct = async ({ dayId, addId, sumId }) => {
   const tempDay = await Days.findById(dayId);
   const tempDayProducts = tempDay.productsId;
   const productToRemove = tempDayProducts.find((product) =>
-    product.foodId.equals(new ObjectId(productId))
+    product._id.equals(new ObjectId(addId))
   );
-  console.log(tempDay.productsId);
+  console.log(productToRemove);
   const updateSummary = await Summary.findByIdAndUpdate(
     sumId,
     {
@@ -113,7 +114,7 @@ const removeProduct = async ({ dayId, productId, sumId }) => {
 
   const updateDay = await Days.findByIdAndUpdate(
     dayId,
-    { $pull: { productsId: { foodId: productId } } },
+    { $pull: { productsId: { _id: addId } } },
     { new: true }
   );
   const response = updateDay
