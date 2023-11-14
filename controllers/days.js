@@ -71,7 +71,7 @@ const getDayInfo = async (body, userId) => {
       .utc(),
   };
   const dataSummary = await Summary.findOne({ date: dayRange, userId });
-  
+
   const dataDay = await Days.findOne({ date: dayRange, userId });
   const getProductsAllowed = dataDay.productsId.map((product) =>
     Product.findById(product.foodId)
@@ -82,7 +82,15 @@ const getDayInfo = async (body, userId) => {
     idDay: dataDay._id,
     eatenProducts: data,
     date: body.date,
-    daySummary: dataSummary,
+    daySummary: {
+      sumId: dataSummary._id,
+      date: dataSummary.date,
+      userId: dataSummary.userId,
+      dailyRate: dataSummary.dailyRate,
+      left: dataSummary.left,
+      consumed: dataSummary.consumed,
+      percentOfDailyRate: dataSummary.percentOfDailyRate,
+    },
   };
 };
 const removeProduct = async ({ dayId, productId, sumId }) => {
