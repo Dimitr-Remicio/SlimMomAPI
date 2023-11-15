@@ -14,7 +14,13 @@ const addProduct = async (body, userId) => {
       $lte: moment.tz(new Date(`${date}T23:59:59.999`), "America/Bogota").utc(),
     };
     const dataProduct = await Product.findById(productId);
-    const { _id: foodId, weight, calories, title, groupBloodNotAllowed } = dataProduct;
+    const {
+      _id: foodId,
+      weight,
+      calories,
+      title,
+      groupBloodNotAllowed,
+    } = dataProduct;
 
     const daySummary = await Summary.findOne({ date: dayCurrent, userId });
     const { _id: sumId, left, consumed, dailyRate } = daySummary;
@@ -50,7 +56,14 @@ const addProduct = async (body, userId) => {
     const index = dataDay.productsId.length - 1;
     return {
       addedProduct: {
-        product: { foodId, weight, calories, title, groupBloodNotAllowed, addId: dataDay.productsId[index]._id },
+        product: {
+          foodId,
+          weight,
+          calories,
+          title,
+          groupBloodNotAllowed,
+          addId: dataDay.productsId[index]._id,
+        },
         dayId: dataDay._id,
         userId,
         weight: amount,
@@ -81,7 +94,8 @@ const getDayInfo = async (body, userId) => {
   const data = await Promise.all(getAllowed.map((product) => product.toJSON()));
   return {
     idDay: dataDay._id,
-    eatenProducts: data,
+    addedProducts: dataDay.productsId,
+    eatenProductsDetails: data,
     date: body.date,
     daySummary: {
       sumId: dataSummary._id,
