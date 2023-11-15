@@ -11,6 +11,7 @@ const daySchema = new Schema(
           type: Schema.Types.ObjectId,
           ref: "Product",
         },
+        title:{type:String, default:""},
         amount: { type: Number, default: 0 },
         caloriesPerAmount: { type: Number, default: 0 },
       },

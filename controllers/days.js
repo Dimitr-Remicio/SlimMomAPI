@@ -14,7 +14,13 @@ const addProduct = async (body, userId) => {
       $lte: moment.tz(new Date(`${date}T23:59:59.999`), "America/Bogota").utc(),
     };
     const dataProduct = await Product.findById(productId);
-    const { _id, weight, calories, title, groupBloodNotAllowed } = dataProduct;
+    const {
+      _id: foodId,
+      weight,
+      calories,
+      title,
+      groupBloodNotAllowed,
+    } = dataProduct;
 
     const daySummary = await Summary.findOne({ date: dayCurrent, userId });
     const { _id: sumId, left, consumed, dailyRate } = daySummary;
@@ -30,7 +36,7 @@ const addProduct = async (body, userId) => {
     await daySummary.save();
 
     const dataDayUpdate = {
-      $push: { productsId: { foodId: _id, amount, caloriesPerAmount } },
+      $push: { productsId: { foodId, title, amount, caloriesPerAmount } },
       userId,
       weight,
       calories: caloriesPerAmount,
@@ -47,9 +53,17 @@ const addProduct = async (body, userId) => {
       }
     );
     console.log(dataDay);
+    const index = dataDay.productsId.length - 1;
     return {
       addedProduct: {
-        product: { _id, weight, calories, title, groupBloodNotAllowed },
+        product: {
+          foodId,
+          weight,
+          calories,
+          title,
+          groupBloodNotAllowed,
+          addId: dataDay.productsId[index]._id,
+        },
         dayId: dataDay._id,
         userId,
         weight: amount,
@@ -71,7 +85,7 @@ const getDayInfo = async (body, userId) => {
       .utc(),
   };
   const dataSummary = await Summary.findOne({ date: dayRange, userId });
-  
+
   const dataDay = await Days.findOne({ date: dayRange, userId });
   const getProductsAllowed = dataDay.productsId.map((product) =>
     Product.findById(product.foodId)
@@ -80,18 +94,27 @@ const getDayInfo = async (body, userId) => {
   const data = await Promise.all(getAllowed.map((product) => product.toJSON()));
   return {
     idDay: dataDay._id,
-    eatenProducts: data,
+    addedProducts: dataDay.productsId,
+    eatenProductsDetails: data,
     date: body.date,
-    daySummary: dataSummary,
+    daySummary: {
+      sumId: dataSummary._id,
+      date: dataSummary.date,
+      userId: dataSummary.userId,
+      dailyRate: dataSummary.dailyRate,
+      left: dataSummary.left,
+      consumed: dataSummary.consumed,
+      percentOfDailyRate: dataSummary.percentOfDailyRate,
+    },
   };
 };
-const removeProduct = async ({ dayId, productId, sumId }) => {
+const removeProduct = async ({ dayId, addId, sumId }) => {
   const tempDay = await Days.findById(dayId);
   const tempDayProducts = tempDay.productsId;
   const productToRemove = tempDayProducts.find((product) =>
-    product.foodId.equals(new ObjectId(productId))
+    product._id.equals(new ObjectId(addId))
   );
-  console.log(tempDay.productsId);
+  console.log(productToRemove);
   const updateSummary = await Summary.findByIdAndUpdate(
     sumId,
     {
@@ -105,7 +128,7 @@ const removeProduct = async ({ dayId, productId, sumId }) => {
 
   const updateDay = await Days.findByIdAndUpdate(
     dayId,
-    { $pull: { productsId: { foodId: productId } } },
+    { $pull: { productsId: { _id: addId } } },
     { new: true }
   );
   const response = updateDay
