@@ -36,7 +36,7 @@ const addProduct = async (body, userId) => {
     await daySummary.save();
 
     const dataDayUpdate = {
-      $push: { productsId: { foodId, amount, caloriesPerAmount } },
+      $push: { productsId: { foodId, title, amount, caloriesPerAmount } },
       userId,
       weight,
       calories: caloriesPerAmount,
